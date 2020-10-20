@@ -21,6 +21,11 @@
   },
   "homepage": "https://github.com/madebymak/shopify-metafield#readme",
   "dependencies": {
+    "@shopify/koa-shopify-auth": "^3.1.72",
+    "dotenv": "^8.2.0",
+    "isomorphic-fetch": "^3.0.0",
+    "koa": "^2.13.0",
+    "koa-session": "^6.1.0",
     "next": "^9.5.5",
     "react": "^16.14.0",
     "react-dom": "^16.14.0"
