@@ -4,7 +4,7 @@ import {
   DisplayText,
   Form,
   FormLayout,
-  Frame
+  Frame,
   Layout,
   Page,
   PageActions,
