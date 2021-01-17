@@ -16,11 +16,9 @@ class Index extends React.Component {
 				<Heading>
 					Search Products
 				</Heading>
-				<Card title='Searchbar' sectioned>
-					<SearchBar name='test'/>
-				</Card>
+				<SearchBar name='test'/>
 			</Page>
-			
+
       // <Page
       //   primaryAction={{
       //     content: 'Select products',
