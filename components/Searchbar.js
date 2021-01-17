@@ -12,7 +12,8 @@ import {
 	TextStyle,
 	Thumbnail,
 	Stack,
-	Badge
+	Badge,
+	Pagination
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import storeEngine from 'store-js/src/store-engine';
@@ -51,10 +52,14 @@ const SearchBar = (props) => {
     {value: 'refurbished', label: 'Refurbished'},
 	];
 
-
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
 	const [options, setOptions] = useState(deselectedOptions);
+
+	const [pageState, setPageState] = useState({
+		next: false,
+		prev: false
+	});
 
   const updateText = useCallback(
     (value) => {
@@ -98,17 +103,27 @@ const SearchBar = (props) => {
     />
 	);
 
+	const updatePagination = useCallback(
+		(element) => {
+			setPageState(element);
+		}
+	);
+
 	const paginationLimit = 10;
 	const paginationCursor = '';
 
 	return (
 		<Query query={GET_PRODUCT_BY_HANDLE} variables={{ numProducts: paginationLimit }}>
 			{(data, loading, error) => {
-				console.log(1, data);
-				let product;
+				// console.log(1, data);
+				let product, paginationState;
 
 				if (data.data) {
 					product = data.data.products.edges;
+					paginationState = data.data.products.pageInfo;
+
+					updatePagination(paginationState);
+					const page = pageState;
 
 					return (
 						<Card sectioned>
@@ -138,7 +153,7 @@ const SearchBar = (props) => {
 											media={<Thumbnail source={imageSrc} />}
 											// accessibilityLabel={`View details for ${name}`}
 										>
-											<div className='flt-right'>
+											<div className='float-right'>
 												<Badge>
 													No Metafields
 												</Badge>
@@ -149,8 +164,17 @@ const SearchBar = (props) => {
 										</ResourceItem>
 									);
 								}}
-										
-								hasMoreItems={true}
+							/>
+
+							<Pagination
+								hasPrevious={ page.hasPreviousPage }
+								onPrevious={() => {
+									console.log('Previous');
+								}}
+								hasNext={ page.hasNextPage }
+								onNext={() => {
+									console.log('Next');
+								}}
 							/>
 						</Card>
 					)
