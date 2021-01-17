@@ -8,6 +8,8 @@ import Cookies from 'js-cookie';
 import ClientRouter from '../components/ClientRouter';
 import ApolloClient from 'apollo-boost';
 import { ApolloProvider } from 'react-apollo';
+import "../assets/custom.css";
+
 
 
 const client = new ApolloClient({

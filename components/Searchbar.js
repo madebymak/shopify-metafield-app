@@ -10,7 +10,9 @@ import {
 	ResourceItem,
 	Card,
 	TextStyle,
-	Thumbnail
+	Thumbnail,
+	Stack,
+	Badge
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import storeEngine from 'store-js/src/store-engine';
@@ -136,12 +138,18 @@ const SearchBar = (props) => {
 											media={<Thumbnail source={imageSrc} />}
 											// accessibilityLabel={`View details for ${name}`}
 										>
+											<div className='flt-right'>
+												<Badge>
+													No Metafields
+												</Badge>
+											</div>
 											<h3>
 												<TextStyle variation="strong">{item.node.title}</TextStyle>
 											</h3>
 										</ResourceItem>
 									);
 								}}
+										
 								hasMoreItems={true}
 							/>
 						</Card>
