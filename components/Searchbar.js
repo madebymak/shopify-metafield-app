@@ -29,6 +29,7 @@ const GET_PRODUCT_BY_HANDLE = gql`
 							cursor
 							node	{
 									title
+									descriptionHtml
 									images (first: 1) {
 										edges {
 											node {
@@ -139,9 +140,10 @@ const SearchBar = (props) => {
 								renderItem={(item) => {
 									// console.log('item', item.node.images.edges);
 
-									let { imageSrc, imageAlt } = '';
+									let { imageSrc, imageAlt };
+									const product = item.node;
 
-									(item.node.images.edges).forEach(element => {
+									(product.images.edges).forEach(element => {
 										imageSrc = element.node.originalSrc;
 										imageAlt = element.node.altText;
 									});
@@ -159,8 +161,10 @@ const SearchBar = (props) => {
 												</Badge>
 											</div>
 											<h3>
-												<TextStyle variation="strong">{item.node.title}</TextStyle>
+												<TextStyle variation="strong">{product.title}</TextStyle>
 											</h3>
+											<TextStyle>{product.title}</TextStyle>
+
 										</ResourceItem>
 									);
 								}}
