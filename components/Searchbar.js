@@ -62,6 +62,11 @@ const SearchBar = (props) => {
 		prev: false
 	});
 
+	const [pagination, setPaginationState] = useState({
+		limit: 10,
+		cursor: null,
+	})
+
   const updateText = useCallback(
     (value) => {
       setInputValue(value);
@@ -110,18 +115,32 @@ const SearchBar = (props) => {
 		}
 	);
 
-	const paginationLimit = 10;
-	const paginationCursor = '';
+	const nextPage = useCallback(
+		(cursor) => {
+			setPaginationState(cursor);
+		console.log('nextpage');
+		}
+	)
 
 	return (
-		<Query query={GET_PRODUCT_BY_HANDLE} variables={{ numProducts: paginationLimit }}>
+
+		<Query query={GET_PRODUCT_BY_HANDLE} variables={{ numProducts: pagination.limit, cursor: pagination.cursor }}>
 			{(data, loading, error) => {
+				//TODO: add loading state
+
 				// console.log(1, data);
-				let product, paginationState;
+				let product, paginationState, productCursor;
 
 				if (data.data) {
+
 					product = data.data.products.edges;
 					paginationState = data.data.products.pageInfo;
+
+					(product).forEach((x, pos, array) => {
+						if (pos == (array.length - 1)) {
+							productCursor = x.cursor;
+						}
+					})
 
 					updatePagination(paginationState);
 					const page = pageState;
@@ -140,10 +159,11 @@ const SearchBar = (props) => {
 								renderItem={(item) => {
 									// console.log('item', item.node.images.edges);
 
-									let { imageSrc, imageAlt };
-									const product = item.node;
+									let imageSrc, imageAlt;
+									const productItem = item.node;
+									const pageCursor = item.cursor;
 
-									(product.images.edges).forEach(element => {
+									(productItem.images.edges).forEach(element => {
 										imageSrc = element.node.originalSrc;
 										imageAlt = element.node.altText;
 									});
@@ -161,9 +181,9 @@ const SearchBar = (props) => {
 												</Badge>
 											</div>
 											<h3>
-												<TextStyle variation="strong">{product.title}</TextStyle>
+												<TextStyle variation="strong">{productItem.title}</TextStyle>
 											</h3>
-											<TextStyle>{product.title}</TextStyle>
+											<TextStyle>{productItem.title} {pageCursor} </TextStyle>
 
 										</ResourceItem>
 									);
@@ -178,6 +198,10 @@ const SearchBar = (props) => {
 								hasNext={ page.hasNextPage }
 								onNext={() => {
 									console.log('Next');
+									nextPage({
+										'limit': 10,
+										'cursor': productCursor
+									});
 								}}
 							/>
 						</Card>
@@ -185,7 +209,7 @@ const SearchBar = (props) => {
 
 				} else {
 					return (
-						<div> No items </div>
+						<div> No items found</div>
 					)
 				}
 			}}
