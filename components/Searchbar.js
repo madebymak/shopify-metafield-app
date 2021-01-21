@@ -17,10 +17,11 @@ import {
 } from '@shopify/polaris';
 import { SearchMinor } from '@shopify/polaris-icons';
 import storeEngine from 'store-js/src/store-engine';
+import next from 'next';
 
-const GET_PRODUCT_BY_HANDLE = gql`
-	query	($numProducts:	Int!,	$cursor:	String){
-			products(first:	$numProducts,	after:	$cursor)	{
+const GET_ALL_PRODUCTS = gql`
+	query	($numProducts:	Int, $lastNum: Int, $before: String,	$after:	String){
+		products(first:	$numProducts, last: $lastNum, before: $before,	after:	$after)	{
 					pageInfo	{
 							hasNextPage
 							hasPreviousPage
@@ -57,14 +58,18 @@ const SearchBar = (props) => {
   const [inputValue, setInputValue] = useState('');
 	const [options, setOptions] = useState(deselectedOptions);
 
+	const limit = 5;
+
 	const [pageState, setPageState] = useState({
 		next: false,
 		prev: false
 	});
 
 	const [pagination, setPaginationState] = useState({
-		limit: 10,
-		cursor: null,
+		first: limit,
+		last: null,
+		before: null,
+		after: null
 	})
 
   const updateText = useCallback(
@@ -115,33 +120,52 @@ const SearchBar = (props) => {
 		}
 	);
 
-	const nextPage = useCallback(
-		(cursor) => {
-			setPaginationState(cursor);
-		console.log('nextpage');
-		}
-	)
+	const nextPage = useCallback((cursor) => {
+		setPaginationState({
+			first: limit,
+			last: null,
+			before: null,
+			after: cursor
+		})
+	});
+
+	const prevPage = useCallback((cursor) => {
+		setPaginationState({
+			first: null,
+			last: limit,
+			before: cursor,
+			after: null
+		})
+	});
 
 	return (
 
-		<Query query={GET_PRODUCT_BY_HANDLE} variables={{ numProducts: pagination.limit, cursor: pagination.cursor }}>
+		<Query query={GET_ALL_PRODUCTS} variables={{
+			numProducts: pagination.first,
+			lastNum: pagination.last,
+			before: pagination.before,
+			after: pagination.after,
+		}}>
 			{(data, loading, error) => {
-				//TODO: add loading state
-
-				// console.log(1, data);
-				let product, paginationState, productCursor;
+				if (loading) return <div>Loading…</div>;
+				if (error) return <div>{error.message}</div>;
+				let product, paginationState, prevCursor, nextCursor;
 
 				if (data.data) {
-
 					product = data.data.products.edges;
 					paginationState = data.data.products.pageInfo;
 
-					(product).forEach((x, pos, array) => {
-						if (pos == (array.length - 1)) {
-							productCursor = x.cursor;
+					(product).forEach((item, pos, array) => {
+						if (pos == 0) {
+							prevCursor = item.cursor;
 						}
-					})
 
+						if (pos == (array.length - 1)) {
+							nextCursor = item.cursor;
+						}
+					});
+
+					// console.log({prevCursor, nextCursor});
 					updatePagination(paginationState);
 					const page = pageState;
 
@@ -183,7 +207,7 @@ const SearchBar = (props) => {
 											<h3>
 												<TextStyle variation="strong">{productItem.title}</TextStyle>
 											</h3>
-											<TextStyle>{productItem.title} {pageCursor} </TextStyle>
+											<TextStyle>{productItem.title}</TextStyle>
 
 										</ResourceItem>
 									);
@@ -194,14 +218,13 @@ const SearchBar = (props) => {
 								hasPrevious={ page.hasPreviousPage }
 								onPrevious={() => {
 									console.log('Previous');
+									prevPage(prevCursor);
+
 								}}
 								hasNext={ page.hasNextPage }
 								onNext={() => {
 									console.log('Next');
-									nextPage({
-										'limit': 10,
-										'cursor': productCursor
-									});
+									nextPage(nextCursor);
 								}}
 							/>
 						</Card>
