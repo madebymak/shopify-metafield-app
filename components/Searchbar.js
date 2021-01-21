@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import store from 'store-js';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
 	Autocomplete,
 	Icon,
@@ -60,65 +60,12 @@ const SearchBar = (props) => {
 
 	const limit = 5;
 
-	const [pageState, setPageState] = useState({
-		next: false,
-		prev: false
-	});
-
-	const [pagination, setPaginationState] = useState({
+	const [paginationState, setPaginationState] = useState({
 		first: limit,
 		last: null,
 		before: null,
 		after: null
-	})
-
-  const updateText = useCallback(
-    (value) => {
-      setInputValue(value);
-      if (value === '') {
-        setOptions(deselectedOptions);
-        return;
-			}
-
-      const filterRegex = new RegExp(value, 'i');
-      const resultOptions = deselectedOptions.filter((option) =>
-        option.label.match(filterRegex),
-      );
-      setOptions(resultOptions);
-    },
-    [deselectedOptions],
-	);
-
-  const updateSelection = useCallback(
-    (selected) => {
-      const selectedValue = selected.map((selectedItem) => {
-        const matchedOption = options.find((option) => {
-          return option.value.match(selectedItem);
-        });
-        return matchedOption && matchedOption.label;
-			});
-
-      setSelectedOptions(selected);
-      setInputValue(selectedValue);
-    },
-    [options],
-	);
-
-  const textField = (
-    <Autocomplete.TextField
-      onChange={updateText}
-      label="Tags"
-      value={inputValue}
-      prefix={<Icon source={SearchMinor} color="inkLighter" />}
-      placeholder="Search"
-    />
-	);
-
-	const updatePagination = useCallback(
-		(element) => {
-			setPageState(element);
-		}
-	);
+	});
 
 	const nextPage = useCallback((cursor) => {
 		setPaginationState({
@@ -138,22 +85,66 @@ const SearchBar = (props) => {
 		})
 	});
 
+	useEffect(() => {}, [paginationState]);
+
+	  // const updateText = useCallback(
+  //   (value) => {
+  //     setInputValue(value);
+  //     if (value === '') {
+  //       setOptions(deselectedOptions);
+  //       return;
+	// 		}
+
+  //     const filterRegex = new RegExp(value, 'i');
+  //     const resultOptions = deselectedOptions.filter((option) =>
+  //       option.label.match(filterRegex),
+  //     );
+  //     setOptions(resultOptions);
+  //   },
+  //   [deselectedOptions],
+	// );
+
+  // const updateSelection = useCallback(
+  //   (selected) => {
+  //     const selectedValue = selected.map((selectedItem) => {
+  //       const matchedOption = options.find((option) => {
+  //         return option.value.match(selectedItem);
+  //       });
+  //       return matchedOption && matchedOption.label;
+	// 		});
+
+  //     setSelectedOptions(selected);
+  //     setInputValue(selectedValue);
+  //   },
+  //   [options],
+	// );
+
+  // const textField = (
+  //   <Autocomplete.TextField
+  //     onChange={updateText}
+  //     label="Tags"
+  //     value={inputValue}
+  //     prefix={<Icon source={SearchMinor} color="inkLighter" />}
+  //     placeholder="Search"
+  //   />
+	// );
+
 	return (
 
 		<Query query={GET_ALL_PRODUCTS} variables={{
-			numProducts: pagination.first,
-			lastNum: pagination.last,
-			before: pagination.before,
-			after: pagination.after,
+			numProducts: paginationState.first,
+			lastNum: paginationState.last,
+			before: paginationState.before,
+			after: paginationState.after,
 		}}>
 			{(data, loading, error) => {
 				if (loading) return <div>Loading…</div>;
 				if (error) return <div>{error.message}</div>;
-				let product, paginationState, prevCursor, nextCursor;
+				let product, pageInfo, prevCursor, nextCursor;
 
 				if (data.data) {
 					product = data.data.products.edges;
-					paginationState = data.data.products.pageInfo;
+					pageInfo = data.data.products.pageInfo;
 
 					(product).forEach((item, pos, array) => {
 						if (pos == 0) {
@@ -165,9 +156,7 @@ const SearchBar = (props) => {
 						}
 					});
 
-					// console.log({prevCursor, nextCursor});
-					updatePagination(paginationState);
-					const page = pageState;
+					const page = pageInfo;
 
 					return (
 						<Card sectioned>
@@ -196,7 +185,7 @@ const SearchBar = (props) => {
 										<ResourceItem
 											// id={id}
 											// url={url}
-											media={<Thumbnail source={imageSrc} />}
+											media={<Thumbnail source={imageSrc} alt={imageAlt}/>}
 											// accessibilityLabel={`View details for ${name}`}
 										>
 											<div className='float-right'>
