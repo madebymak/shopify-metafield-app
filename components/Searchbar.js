@@ -1,6 +1,5 @@
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
-import store from 'store-js';
 
 import { useState, useCallback, useEffect } from 'react';
 import {
@@ -15,33 +14,37 @@ import {
 	Badge,
 	Pagination
 } from '@shopify/polaris';
-import { SearchMinor } from '@shopify/polaris-icons';
-import storeEngine from 'store-js/src/store-engine';
-import next from 'next';
 
 const GET_ALL_PRODUCTS = gql`
-	query	($numProducts:	Int, $lastNum: Int, $before: String,	$after:	String){
-		products(first:	$numProducts, last: $lastNum, before: $before,	after:	$after)	{
-					pageInfo	{
-							hasNextPage
-							hasPreviousPage
-					}
-					edges	{
-							cursor
-							node	{
-									title
-									descriptionHtml
-									images (first: 1) {
-										edges {
-											node {
-												originalSrc
-												altText
-											}
-										}
-									}
-							}
-					}
+	query	($numProducts:	Int, $lastNum: Int, $before: String,	$after:	String) {
+		products(first:	$numProducts, last: $lastNum, before: $before,	after:	$after, sortKey:TITLE)	{
+			pageInfo	{
+					hasNextPage
+					hasPreviousPage
 			}
+			edges	{
+				cursor
+				node	{
+					title
+					descriptionHtml
+					images (first: 1) {
+						edges {
+							node {
+								originalSrc
+								altText
+							}
+						}
+					}
+					metafields(first:1) {
+						edges {
+							node {
+								namespace
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 `;
 
@@ -58,7 +61,7 @@ const SearchBar = (props) => {
   const [inputValue, setInputValue] = useState('');
 	const [options, setOptions] = useState(deselectedOptions);
 
-	const limit = 5;
+	const limit = 10;
 
 	const [paginationState, setPaginationState] = useState({
 		first: limit,
@@ -174,7 +177,9 @@ const SearchBar = (props) => {
 
 									let imageSrc, imageAlt;
 									const productItem = item.node;
-									const pageCursor = item.cursor;
+									const productMetafields = (item.node.metafields.edges).length;
+									const hasMetafields = productMetafields == 0 ? 'No Metafields' : 'Metafields';
+									const metafieldStatus = productMetafields == 0 ? 'default' : 'success';
 
 									(productItem.images.edges).forEach(element => {
 										imageSrc = element.node.originalSrc;
@@ -189,8 +194,8 @@ const SearchBar = (props) => {
 											// accessibilityLabel={`View details for ${name}`}
 										>
 											<div className='float-right'>
-												<Badge>
-													No Metafields
+												<Badge status={metafieldStatus}>
+													{hasMetafields}
 												</Badge>
 											</div>
 											<h3>
@@ -203,22 +208,21 @@ const SearchBar = (props) => {
 								}}
 							/>
 
-							<Pagination
-								hasPrevious={ page.hasPreviousPage }
-								onPrevious={() => {
-									console.log('Previous');
-									prevPage(prevCursor);
-
-								}}
-								hasNext={ page.hasNextPage }
-								onNext={() => {
-									console.log('Next');
-									nextPage(nextCursor);
-								}}
-							/>
+							<div className='text-center'>
+								<Pagination
+									label=''
+									hasPrevious={ page.hasPreviousPage }
+									onPrevious={() => {
+										prevPage(prevCursor);
+									}}
+									hasNext={ page.hasNextPage }
+									onNext={() => {
+										nextPage(nextCursor);
+									}}
+								/>
+							</div>
 						</Card>
 					)
-
 				} else {
 					return (
 						<div> No items found</div>
