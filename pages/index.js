@@ -3,20 +3,28 @@ import { ResourcePicker, TitleBar } from '@shopify/app-bridge-react';
 import store from 'store-js';
 import ResourceListWithProducts from '../components/ResourceList';
 import SearchBar from '../components/Searchbar';
+import ResourceProduct from '../components/ResourceProduct';
+
 
 const img = 'https://cdn.shopify.com/s/files/1/0757/9955/files/empty-state.svg';
 
 class Index extends React.Component {
-  state = { open: true };
+	state = { open: true };
+
+	test = (props) => { 
+		console.log({props});
+	}
+
   render() {
 		const emptyState = !store.get('ids');
+		let test= 'test';
 
 		return (
 			<Page>
 				<Heading>
-					Search Products
+					{/* Search Products */}
 				</Heading>
-				<SearchBar name='test'/>
+				<SearchBar name='test' />
 			</Page>
 
       // <Page

@@ -14,6 +14,7 @@ import {
 	Badge,
 	Pagination
 } from '@shopify/polaris';
+import EditProduct from './ResourceProduct';
 
 const GET_ALL_PRODUCTS = gql`
 	query	($numProducts:	Int, $lastNum: Int, $before: String,	$after:	String) {
@@ -25,6 +26,7 @@ const GET_ALL_PRODUCTS = gql`
 			edges	{
 				cursor
 				node	{
+					id
 					title
 					descriptionHtml
 					images (first: 1) {
@@ -63,12 +65,16 @@ const SearchBar = (props) => {
 
 	const limit = 10;
 
+	const [editProductState, setEditProduct] = useState(false)
+
 	const [paginationState, setPaginationState] = useState({
 		first: limit,
 		last: null,
 		before: null,
 		after: null
 	});
+
+	const [productId, setProductId] = useState('');
 
 	const nextPage = useCallback((cursor) => {
 		setPaginationState({
@@ -87,6 +93,11 @@ const SearchBar = (props) => {
 			after: null
 		})
 	});
+
+	const getProductId = useCallback((id) => { 
+		console.log({ id });
+		setProductId(id);
+	})
 
 	useEffect(() => {}, [paginationState]);
 
@@ -163,50 +174,53 @@ const SearchBar = (props) => {
 
 					return (
 						<Card sectioned>
-						{/* <Autocomplete
-							options={options}
-							selected={selectedOptions}
-							onSelect={updateSelection}
-							textField={textField}
-						/> */}
-							<ResourceList
-								resourceName={{ singular: 'Product', plural: 'Products' }}
-								items={product}
-								renderItem={(item) => {
-									// console.log('item', item.node.images.edges);
+							{editProductState ? <EditProduct editProductState={setEditProduct} data={productId} /> :
+								<ResourceList
+									resourceName={{ singular: 'Product', plural: 'Products' }}
+									items={product}
+									renderItem={(item) => {
+										// console.log('item', item.node.images.edges);
 
-									let imageSrc, imageAlt;
-									const productItem = item.node;
-									const productMetafields = (item.node.metafields.edges).length;
-									const hasMetafields = productMetafields == 0 ? 'No Metafields' : 'Metafields';
-									const metafieldStatus = productMetafields == 0 ? 'default' : 'success';
+										let imageSrc, imageAlt;
+										const productItem = item.node;
+										const productMetafields = (item.node.metafields.edges).length;
+										const hasMetafields = productMetafields == 0 ? 'No Metafields' : 'Metafields';
+										const metafieldStatus = productMetafields == 0 ? 'default' : 'success';
 
-									(productItem.images.edges).forEach(element => {
-										imageSrc = element.node.originalSrc;
-										imageAlt = element.node.altText;
-									});
+										(productItem.images.edges).forEach(element => {
+											imageSrc = element.node.originalSrc;
+											imageAlt = element.node.altText;
+										});
 
-									return (
-										<ResourceItem
-											// id={id}
-											// url={url}
-											media={<Thumbnail source={imageSrc} alt={imageAlt}/>}
-											// accessibilityLabel={`View details for ${name}`}
-										>
-											<div className='float-right'>
-												<Badge status={metafieldStatus}>
-													{hasMetafields}
-												</Badge>
-											</div>
-											<h3>
-												<TextStyle variation="strong">{productItem.title}</TextStyle>
-											</h3>
-											<TextStyle>{productItem.title}</TextStyle>
+										const productId = item.node.id;
 
-										</ResourceItem>
-									);
-								}}
-							/>
+										return (
+											<ResourceItem
+												// id={id}
+												// url={url}
+												media={<Thumbnail source={imageSrc} alt={imageAlt} />}
+												// accessibilityLabel={`View details for ${name}`}
+												onClick={() => {
+													// console.log({ item });
+													getProductId(item.node.id);
+													setEditProduct(true);
+												}}
+											>
+												<div className='float-right'>
+													<Badge status={metafieldStatus}>
+														{hasMetafields}
+													</Badge>
+												</div>
+												<h3>
+													<TextStyle variation="strong">{productItem.title}</TextStyle>
+												</h3>
+												<TextStyle>{productItem.title}</TextStyle>
+
+											</ResourceItem>
+										);
+									}}
+								/>
+									}
 
 							<div className='text-center'>
 								<Pagination
