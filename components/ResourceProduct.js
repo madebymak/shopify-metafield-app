@@ -1,7 +1,10 @@
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import {
+	FormLayout,
+	Heading,
 	Page,
+	TextField,
 	Spinner
 } from '@shopify/polaris';
 import store from 'store-js';
@@ -36,7 +39,18 @@ const EditProduct = (props) => {
 
 		if (productData) {
 			return(
-				<div>{productData.product.title}</div>
+				<div>
+					<Page separator>
+						<FormLayout>
+							<Heading>Metafields</Heading>
+							<FormLayout.Group>
+								<TextField label="Key" onChange={() => {}} />
+								<TextField label="Namespace" onChange={() => {}} />
+							</FormLayout.Group>
+							<TextField label="Value" onChange={() => {}} />
+						</FormLayout>
+					</Page>
+				</div>
 			)
 		} else {
 			return (
@@ -53,6 +67,12 @@ const EditProduct = (props) => {
 				if (loading) return <div>Loading…</div>
 				if (error) return <div>{error.message}</div>;
 
+				let productTitle;
+
+				if (data.data) {
+					productTitle = data.data.product.title;
+				}
+
 				return (
 					<Page
 						breadcrumbs={[{
@@ -60,8 +80,10 @@ const EditProduct = (props) => {
 								backToProducts();
 							}
 						}]}
+						title={productTitle}
+						primaryAction={{ content: 'Save', disabled: true }}
 					>
-							<LoadProductData data={data}/>
+						<LoadProductData data={data}/>
 					</Page>
 				)
 			}}
