@@ -1,13 +1,8 @@
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import {
-  Card,
 	Page,
-  ResourceList,
-  Stack,
-  TextStyle,
-	Thumbnail,
-	Link
+	Spinner
 } from '@shopify/polaris';
 import store from 'store-js';
 import { Redirect } from '@shopify/app-bridge/actions';
@@ -17,6 +12,7 @@ import { useState } from 'react';
 const GET_PRODUCTS_BY_ID = gql`
 	query ($id: ID!) {
 		product(id: $id) {
+			title
 			metafields(first: 50) {
 				edges {
 					node {
@@ -31,39 +27,46 @@ const GET_PRODUCTS_BY_ID = gql`
 `;
 
 const EditProduct = (props) => {
-	console.log({ props });
-	const handleChange = () => {
+	const backToProducts = () => {
 		props.editProductState(false);
+	}
+
+	const LoadProductData = (props) => {
+		const productData = props.data.data;
+
+		if (productData) {
+			return(
+				<div>{productData.product.title}</div>
+			)
+		} else {
+			return (
+				<div className='text-center margin-32'>
+					<Spinner accessibilityLabel='loading icon' size='large' color='inkLightest' />
+				</div>
+			)
+		}
 	}
 
 	return (
 		<Query query={GET_PRODUCTS_BY_ID} variables={{ id: props.data }}>
-			{(data, loading, error) => { 
-				if (loading) return <div>Loading…</div>;
+			{(data, loading, error,) => {
+				if (loading) return <div>Loading…</div>
 				if (error) return <div>{error.message}</div>;
-				// productData = data;
-				console.log({data});
 
 				return (
 					<Page
 						breadcrumbs={[{
 							content: 'Back', onAction: () => {
-								handleChange();
-						} }]}>
-						{/* <Link onClick={() => { 
-							console.log('back');
-						}}
-						
-						>
-							Back
-						</Link> */}
-							testing product: {props.data}
+								backToProducts();
+							}
+						}]}
+					>
+							<LoadProductData data={data}/>
 					</Page>
 				)
 			}}
 		</Query>
 	)
-		
 }
 
 export default EditProduct;

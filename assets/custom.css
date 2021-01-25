@@ -5,3 +5,7 @@
 .text-center {
 	text-align: center;
 }
+
+.margin-32 {
+	margin: 32px;
+}
