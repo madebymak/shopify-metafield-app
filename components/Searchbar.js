@@ -15,6 +15,7 @@ import {
 	Pagination
 } from '@shopify/polaris';
 import EditProduct from './ResourceProduct';
+import LoadingSpinner from './LoadingSpinner';
 
 const GET_ALL_PRODUCTS = gql`
 	query	($numProducts:	Int, $lastNum: Int, $before: String,	$after:	String) {
@@ -152,11 +153,12 @@ const SearchBar = (props) => {
 			after: paginationState.after,
 		}}>
 			{(data, loading, error) => {
-				if (loading) return <div>Loading…</div>;
 				if (error) return <div>{error.message}</div>;
 				let product, pageInfo, prevCursor, nextCursor;
 
-				if (data.data) {
+				if (data.loading) {
+					return <LoadingSpinner />
+				} else {
 					product = data.data.products.edges;
 					pageInfo = data.data.products.pageInfo;
 
@@ -236,10 +238,6 @@ const SearchBar = (props) => {
 								/>
 							</div>
 						</Card>
-					)
-				} else {
-					return (
-						<div> No items found</div>
 					)
 				}
 			}}
