@@ -10,6 +10,10 @@
 	margin: 32px;
 }
 
+.margin-bottom-30 {
+	margin-bottom: 30px;
+}
+
 .flex {
 	display: flex;
 }

@@ -45,21 +45,36 @@ const EditProduct = (props) => {
 	const Metafields = (data) => {
 		const metafieldData = data.props.product.metafields.edges;
 
-		const loadMetafield = (
-			<div>
-				<FormLayout.Group>
-					<TextField label='Key' value='test' onChange={() => { }} />
-					<TextField label='Namespace' value='test' onChange={() => { }} />
-				</FormLayout.Group>
-				<FormLayout.Group>
-					<TextField label='Value' value='test' onChange={() => { }} />
-				</FormLayout.Group>
-			</div>
-		);
+		let metafieldArr = []
+
+		const loadMetafield = (metafieldData) => {
+			metafieldData.map((item) => {
+				metafieldArr.push(item);
+			});
+
+			return (
+				<div>
+					{metafieldArr.map((item, index) => {
+						return (
+							<div className='margin-bottom-30' key={index}>
+								{item.node.key}
+								<FormLayout.Group>
+									<TextField label='Key' value={item.node.key} onChange={() => { }} />
+									<TextField label='Namespace' value={item.node.namespace} onChange={() => { }} />
+								</FormLayout.Group>
+								<FormLayout.Group>
+									<TextField label='Value' value={item.node.value} onChange={() => { }} />
+								</FormLayout.Group>
+							</div>
+						)
+					})}
+				</div>
+			)
+		};
 
 		const emptyMetafield = <div>Empty Metafields</div>
 
-		return metafieldData.length > 0 ? loadMetafield : emptyMetafield;
+		return metafieldData.length > 0 ? loadMetafield(metafieldData) : emptyMetafield;
 	}
 
 	const LoadProductData = (props) => {
