@@ -8,10 +8,6 @@ import {
 	Thumbnail,
 	Spinner
 } from '@shopify/polaris';
-import store from 'store-js';
-import { Redirect } from '@shopify/app-bridge/actions';
-import { Context } from '@shopify/app-bridge-react';
-import { useState } from 'react';
 
 const GET_PRODUCTS_BY_ID = gql`
 	query ($id: ID!) {
@@ -43,31 +39,43 @@ const EditProduct = (props) => {
 		props.editProductState(false);
 	}
 
+	const Metafields = (data) => {
+		const metafieldData = data.props.product.metafields.edges;
+
+		const loadMetafield = (
+			<div>
+				<FormLayout.Group>
+					<TextField label='Key' value='test' onChange={() => { }} />
+					<TextField label='Namespace' value='test' onChange={() => { }} />
+				</FormLayout.Group>
+				<FormLayout.Group>
+					<TextField label='Value' value='test' onChange={() => { }} />
+				</FormLayout.Group>
+			</div>
+		);
+
+		const emptyMetafield = <div>Empty Metafields</div>
+
+		return metafieldData.length > 0 ? loadMetafield : emptyMetafield;
+	}
+
 	const LoadProductData = (props) => {
 		const productData = props.data.data;
 
-		if (productData) {
-			return(
-				<div>
-					<Page separator>
-						<FormLayout>
-							<Heading>Metafields</Heading>
-							<FormLayout.Group>
-								<TextField label="Key" onChange={() => {}} />
-								<TextField label="Namespace" onChange={() => {}} />
-							</FormLayout.Group>
-							<TextField label="Value" onChange={() => {}} />
-						</FormLayout>
-					</Page>
-				</div>
-			)
-		} else {
-			return (
-				<div className='text-center margin-32'>
-					<Spinner accessibilityLabel='loading icon' size='large' color='inkLightest' />
-				</div>
-			)
-		}
+		const MetafieldComponent = (
+				<FormLayout>
+					<Heading>Metafields</Heading>
+					<Metafields props={productData} />
+				</FormLayout>
+		);
+
+		const LoadingSpinner = (
+			<div className='text-center margin-32'>
+				<Spinner accessibilityLabel='loading icon' size='large' color='inkLightest' />
+			</div>
+		);
+
+		return productData ? MetafieldComponent : LoadingSpinner;
 	}
 
 	return (
@@ -93,7 +101,7 @@ const EditProduct = (props) => {
 						}]}
 						title={productTitle}
 						primaryAction={{ content: 'Save', disabled: true }}
-						thumbnail={<Thumbnail source={productImage} alt={productImage} />}
+						thumbnail={<Thumbnail source={productImage} alt={productAlt} />}
 					>
 						<LoadProductData data={data}/>
 					</Page>
