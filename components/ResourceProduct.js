@@ -5,17 +5,19 @@ import {
 	Heading,
 	Page,
 	TextField,
-	Thumbnail,
-	Spinner
+	Thumbnail
 } from '@shopify/polaris';
+import LoadingSpinner from './LoadingSpinner';
 
 const GET_PRODUCTS_BY_ID = gql`
 	query ($id: ID!) {
 		product(id: $id) {
+			id
 			title
 			images (first: 1) {
 				edges {
 					node {
+						id
 						originalSrc
 						altText
 					}
@@ -24,6 +26,7 @@ const GET_PRODUCTS_BY_ID = gql`
 			metafields(first: 50) {
 				edges {
 					node {
+						id
 						namespace
 						key
 						value
@@ -69,43 +72,44 @@ const EditProduct = (props) => {
 				</FormLayout>
 		);
 
-		const LoadingSpinner = (
-			<div className='text-center margin-32'>
-				<Spinner accessibilityLabel='loading icon' size='large' color='inkLightest' />
-			</div>
-		);
-
-		return productData ? MetafieldComponent : LoadingSpinner;
+		return MetafieldComponent;
 	}
 
 	return (
 		<Query query={GET_PRODUCTS_BY_ID} variables={{ id: props.data }}>
-			{(data, loading, error,) => {
-				if (loading) return <div>Loading…</div>
+			{(data, loading, error) => {
 				if (error) return <div>{error.message}</div>;
 
-				let productTitle, productImage, productAlt;
+				if (data.loading) {
+					return <LoadingSpinner />
+				} else {
+					let productTitle, productImageSrc, productImageAlt;
 
-				if (data.data) {
-					productTitle = data.data.product.title;
-					productImage = data.data.product.images.edges[0].node.originalSrc;
-					productAlt = data.data.product.images.edges[0].node.altText;
+					const productResult = data.data;
+					const productImage = (productResult.product.images.edges).shift();
+
+					productTitle = productResult.product.title;
+
+					// TODO: Fix issue with missing img src on reload
+					// productImageSrc = productImage.node.originalSrc;
+					// productImageAlt = productImage.node.altText;
+
+
+					return (
+						<Page
+							breadcrumbs={[{
+								content: 'Back', onAction: () => {
+									backToProducts();
+								}
+							}]}
+							title={productTitle}
+							primaryAction={{ content: 'Save', disabled: true }}
+							// thumbnail={<Thumbnail source={productImageSrc} alt={productImageAlt} />}
+						>
+							<LoadProductData data={data}/>
+						</Page>
+					)
 				}
-
-				return (
-					<Page
-						breadcrumbs={[{
-							content: 'Back', onAction: () => {
-								backToProducts();
-							}
-						}]}
-						title={productTitle}
-						primaryAction={{ content: 'Save', disabled: true }}
-						thumbnail={<Thumbnail source={productImage} alt={productAlt} />}
-					>
-						<LoadProductData data={data}/>
-					</Page>
-				)
 			}}
 		</Query>
 	)
