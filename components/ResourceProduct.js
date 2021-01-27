@@ -1,12 +1,20 @@
 import gql from 'graphql-tag';
 import { Query } from 'react-apollo';
 import {
+	Button,
+	Card,
 	FormLayout,
 	Heading,
+	Icon,
 	Page,
+	Stack,
+	TextContainer,
 	TextField,
 	Thumbnail
 } from '@shopify/polaris';
+import {
+  DeleteMajor
+} from '@shopify/polaris-icons';
 import LoadingSpinner from './LoadingSpinner';
 
 const GET_PRODUCTS_BY_ID = gql`
@@ -56,23 +64,45 @@ const EditProduct = (props) => {
 				<div>
 					{metafieldArr.map((item, index) => {
 						return (
-							<div className='margin-bottom-30' key={index}>
-								{item.node.key}
-								<FormLayout.Group>
-									<TextField label='Key' value={item.node.key} onChange={() => { }} />
-									<TextField label='Namespace' value={item.node.namespace} onChange={() => { }} />
-								</FormLayout.Group>
-								<FormLayout.Group>
-									<TextField label='Value' value={item.node.value} onChange={() => { }} />
-								</FormLayout.Group>
-							</div>
+							<Card sectioned>
+								<Stack>
+									<Stack.Item fill>
+										<Heading>{item.node.key}</Heading>
+									</Stack.Item>
+									<Stack.Item>
+										<Button onClick={() => { console.log('delete');}}>
+											<Icon source={DeleteMajor} />
+										</Button>
+									</Stack.Item>
+								</Stack>
+
+								<Stack>
+									<Stack.Item fill>
+										<FormLayout.Group>
+											<TextField label='Key' value={item.node.key} onChange={() => { }} />
+											<TextField label='Namespace' value={item.node.namespace} onChange={() => { }} />
+										</FormLayout.Group>
+										<FormLayout.Group>
+											<TextField label='Value' value={item.node.value} onChange={() => { }} />
+										</FormLayout.Group>
+									</Stack.Item>
+								</Stack>
+
+							</Card>
 						)
 					})}
 				</div>
 			)
 		};
 
-		const emptyMetafield = <div>Empty Metafields</div>
+		const emptyMetafield = (
+			<Card sectioned>
+				<TextContainer> 
+					No Metafields Found
+				</TextContainer>
+				<Button>Add Metafield</Button>
+
+			</Card>)
 
 		return metafieldData.length > 0 ? loadMetafield(metafieldData) : emptyMetafield;
 	}
@@ -81,10 +111,10 @@ const EditProduct = (props) => {
 		const productData = props.data.data;
 
 		const MetafieldComponent = (
-				<FormLayout>
-					<Heading>Metafields</Heading>
-					<Metafields props={productData} />
-				</FormLayout>
+			<FormLayout>
+				<Heading>Metafields</Heading>
+				<Metafields props={productData} />
+			</FormLayout>
 		);
 
 		return MetafieldComponent;
@@ -109,7 +139,6 @@ const EditProduct = (props) => {
 					// productImageSrc = productImage.node.originalSrc;
 					// productImageAlt = productImage.node.altText;
 
-
 					return (
 						<Page
 							breadcrumbs={[{
@@ -119,9 +148,13 @@ const EditProduct = (props) => {
 							}]}
 							title={productTitle}
 							primaryAction={{ content: 'Save', disabled: true }}
+							secondaryActions={[
+								{content: 'Add metafield'},
+								{content: 'View product'},
+  						]}
 							// thumbnail={<Thumbnail source={productImageSrc} alt={productImageAlt} />}
 						>
-							<LoadProductData data={data}/>
+							<LoadProductData data={data} />
 						</Page>
 					)
 				}
