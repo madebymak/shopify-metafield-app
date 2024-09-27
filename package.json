@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "next",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start"
+    "start": "NODE_ENV=production node server.js"
   },
   "repository": {
     "type": "git",
@@ -21,8 +21,22 @@
   },
   "homepage": "https://github.com/madebymak/shopify-metafield#readme",
   "dependencies": {
+    "@shopify/app-bridge-react": "^1.27.2",
+    "@shopify/koa-shopify-auth": "^3.1.72",
+    "@shopify/koa-shopify-graphql-proxy": "^4.0.2",
+    "@shopify/polaris": "^5.8.6",
+    "@zeit/next-css": "^1.0.1",
+    "apollo-boost": "^0.4.9",
+    "dotenv": "^8.2.0",
+    "graphql": "^15.3.0",
+    "isomorphic-fetch": "^3.0.0",
+    "js-cookie": "^2.2.1",
+    "koa": "^2.13.0",
+    "koa-session": "^6.1.0",
     "next": "^9.5.5",
     "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react-apollo": "^3.1.5",
+    "react-dom": "^16.14.0",
+    "store-js": "^2.0.4"
   }
 }

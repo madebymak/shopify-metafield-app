@@ -1,0 +1,19 @@
+.float-right {
+	float: right;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.margin-32 {
+	margin: 32px;
+}
+
+.flex {
+	display: flex;
+}
+
+.justify-space-bw {
+	justify-content: space-between;
+}
